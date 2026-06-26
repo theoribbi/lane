@@ -28,6 +28,7 @@ const DependsOnSchema = z.object({
 const ManifestSchema = z.object({
   name: z.string().min(1),
   runtime: z.enum(["container", "native"]),
+  compose: z.string().optional(),
   services: z.record(ServiceSchema),
   db: DbSchema,
   dependsOn: z.array(DependsOnSchema).optional(),

@@ -55,5 +55,11 @@ describe("up", () => {
     expect(web.db?.user).toBe("web");
     expect(web.db?.password).toBe("pw");
     expect(api.repoRoot).toBe(apiRoot);
+    // container services start with --no-deps so a bundled DB isn't pulled in
+    const webUp = runner.calls.find(
+      (c) => c.cmd === "docker" && c.args.includes("up") && c.args.includes("web"),
+    )!;
+    expect(webUp.args).toContain("--no-deps");
+    expect(webUp.args).toContain("docker-compose.yml");
   });
 });

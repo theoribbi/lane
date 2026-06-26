@@ -25,6 +25,7 @@ export interface DbManifest {
 export interface Manifest {
   name: string;
   runtime: Runtime;
+  compose?: string; // compose file path relative to repo root (default docker-compose.yml)
   services: Record<string, ServiceManifest>;
   db: DbManifest;
   dependsOn?: DependsOn[];

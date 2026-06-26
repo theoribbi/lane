@@ -61,9 +61,13 @@ export async function up(
     await writeFile(path.join(repo.worktreePath, ".lane", "compose.override.yml"), renderComposeOverride(m, repo, vars), "utf8");
     if (m.runtime === "container") {
       const svcNames = repo.services.map((s) => s.name);
+      const composeFile = m.compose ?? "docker-compose.yml";
+      // --no-deps: start exactly the manifest's services. Without it, a service
+      // that `depends_on` a bundled DB would pull that DB up under the env
+      // project — but lane uses the shared persistent DB, not a per-env one.
       await deps.runner.run("docker", [
-        "compose", "-f", "docker-compose.yml", "-f", ".lane/compose.override.yml",
-        "-p", repo.composeProject, "up", "-d", ...svcNames,
+        "compose", "-f", composeFile, "-f", ".lane/compose.override.yml",
+        "-p", repo.composeProject, "up", "-d", "--no-deps", ...svcNames,
       ], { cwd: repo.worktreePath });
     }
   }

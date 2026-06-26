@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.1.1](https://github.com/theoribbi/lane/compare/lane@0.1.0...lane@0.1.1) (2026-06-26)
+
 # 0.1.0 (2026-06-26)
 
 

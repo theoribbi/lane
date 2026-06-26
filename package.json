@@ -1,6 +1,6 @@
 {
   "name": "@theoribbi/lane",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Isolated multi-repo worktree dev environments — cloned DBs, derived ports, zero env wiring.",
   "type": "module",
   "license": "MIT",

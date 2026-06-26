@@ -162,6 +162,17 @@ then materializes each repo: create the worktree, clone the DB via
 reverses it precisely from that record, after a cleanliness gate that refuses to
 destroy uncommitted or unpushed work.
 
+## Claude Code skill
+
+This repo ships a [Claude Code](https://claude.ai/code) skill at
+[`skills/lane/SKILL.md`](./skills/lane/SKILL.md) so agents know to reach for
+`lane` when they start isolated or parallel multi-repo work. Install it:
+
+```sh
+mkdir -p ~/.claude/skills/lane
+cp skills/lane/SKILL.md ~/.claude/skills/lane/
+```
+
 ## Contributing
 
 Contributions welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md). In short:

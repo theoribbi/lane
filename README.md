@@ -50,7 +50,7 @@ agents reach for it automatically):
 
 ```text
 /plugin marketplace add theoribbi/lane
-/plugin install lane@lane-dev
+/plugin install lane@lane
 ```
 
 **As a skill, any agent** ([skills.sh](https://www.skills.sh) — Claude Code,

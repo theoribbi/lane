@@ -1,13 +1,17 @@
 import type { Runner } from "./runner.js";
 import type { DbManifest } from "./types.js";
 
-function requirePg(db: DbManifest): asserts db is Required<Pick<DbManifest, "container" | "user" | "source">> & DbManifest {
+function requireClone(db: DbManifest): asserts db is Required<Pick<DbManifest, "container" | "user" | "source">> & DbManifest {
   if (!db.container || !db.user || !db.source) throw new Error(`db manifest incomplete for engine ${db.engine}`);
+}
+
+function requireDrop(db: DbManifest): asserts db is Required<Pick<DbManifest, "container" | "user">> & DbManifest {
+  if (!db.container || !db.user) throw new Error(`db manifest incomplete for engine ${db.engine}`);
 }
 
 export async function cloneDb(runner: Runner, db: DbManifest, target: string): Promise<void> {
   if (db.engine === "none") return;
-  requirePg(db);
+  requireClone(db);
   const env = { PGPASSWORD: db.password ?? "", MYSQL_PWD: db.password ?? "" };
   if (db.engine === "postgres") {
     await runner.run("docker", ["exec", db.container, "createdb", "-U", db.user, target], { env });
@@ -22,7 +26,7 @@ export async function cloneDb(runner: Runner, db: DbManifest, target: string): P
 
 export async function dropDb(runner: Runner, db: DbManifest, target: string): Promise<void> {
   if (db.engine === "none") return;
-  requirePg(db);
+  requireDrop(db);
   const env = { PGPASSWORD: db.password ?? "", MYSQL_PWD: db.password ?? "" };
   if (db.engine === "postgres") {
     await runner.run("docker", ["exec", db.container, "psql", "-U", db.user, "-d", "postgres", "-c", `DROP DATABASE IF EXISTS "${target}" WITH (FORCE)`], { env });

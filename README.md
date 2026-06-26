@@ -96,7 +96,7 @@ node scripts/check-manifest-drift.mjs lane.yml docker-compose.yml
 **Pre-commit hook (`.husky/pre-commit` or equivalent):**
 
 ```sh
-pnpm dlx --package=lane lane check-drift lane.yml docker-compose.yml
+node node_modules/lane/scripts/check-manifest-drift.mjs lane.yml docker-compose.yml
 ```
 
 Or call `checkDrift` directly in your own scripts:

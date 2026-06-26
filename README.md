@@ -162,15 +162,22 @@ then materializes each repo: create the worktree, clone the DB via
 reverses it precisely from that record, after a cleanliness gate that refuses to
 destroy uncommitted or unpushed work.
 
-## Claude Code skill
+## Claude Code plugin
 
-This repo ships a [Claude Code](https://claude.ai/code) skill at
-[`skills/lane/SKILL.md`](./skills/lane/SKILL.md) so agents know to reach for
-`lane` when they start isolated or parallel multi-repo work. Install it:
+This repo is also a [Claude Code](https://claude.ai/code) plugin: it bundles a
+skill ([`skills/lane/SKILL.md`](./skills/lane/SKILL.md)) so agents know to reach
+for `lane` when they start isolated or parallel multi-repo work. Install it like
+any plugin:
+
+```text
+/plugin marketplace add theoribbi/lane
+/plugin install lane@lane-dev
+```
+
+Prefer just the skill, no plugin? Copy it in:
 
 ```sh
-mkdir -p ~/.claude/skills/lane
-cp skills/lane/SKILL.md ~/.claude/skills/lane/
+mkdir -p ~/.claude/skills/lane && cp skills/lane/SKILL.md ~/.claude/skills/lane/
 ```
 
 ## Contributing

@@ -1,0 +1,19 @@
+{
+  "name": "lane",
+  "description": "Isolated multi-repo worktree dev environments for parallel coding agents — bundles the lane workflow skill.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Théo Ribbi",
+    "email": "theo@ribbi.ch"
+  },
+  "homepage": "https://github.com/theoribbi/lane",
+  "repository": "https://github.com/theoribbi/lane",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "git-worktree",
+    "ai-agents",
+    "parallel",
+    "devex"
+  ]
+}

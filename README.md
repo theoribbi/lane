@@ -50,6 +50,13 @@ agents reach for it automatically):
 /plugin install lane@lane-dev
 ```
 
+**As a skill, any agent** ([skills.sh](https://www.skills.sh) — Claude Code,
+Cursor, Codex, Copilot, Windsurf, Gemini…):
+
+```sh
+npx skills add theoribbi/lane
+```
+
 **As a CLI** (npm):
 
 ```sh

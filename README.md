@@ -179,12 +179,44 @@ const msgs = checkDrift(manifestYaml, composeYaml); // [] = no drift
 
 ## How it works
 
-`up` builds an `EnvRecord` (the generated source of truth under `~/.lane`),
-then materializes each repo: create the worktree, clone the DB via
-`pg_dump | pg_restore` (tolerates a live source — never `TEMPLATE`), write the
-`.env` + `.lane/compose.override.yml`, and start container services. `down`
-reverses it precisely from that record, after a cleanliness gate that refuses to
-destroy uncommitted or unpushed work.
+Two commands and one generated record under `~/.lane` that tracks exactly what
+each env created.
+
+`lane up <env> <repos…>`, for the env:
+
+1. Allocate one offset; bind each service to `basePort + offset` (probe upward if
+   the port is taken).
+2. Create the git worktree for each repo.
+3. Clone its database from the live seeded source into `<db>_<env>` —
+   `pg_dump | pg_restore` (Postgres) or `mysqldump | mysql` (MySQL). Never
+   `TEMPLATE`, so the source can stay running.
+4. Write the worktree's `.env` and `.lane/compose.override.yml`, resolving each
+   cross-repo URL from the shared offset.
+5. Start the container services. Native services (no container) you run yourself
+   against the generated `.env`.
+
+`lane down <env>` reverses what the record says — stop containers, drop the
+cloned DB, remove the worktree — but only after a gate that refuses if any
+worktree has uncommitted or unpushed work (`--force` to override). Because the
+record names everything `up` made, `down` is exact and `lane prune` can spot what
+an interrupted run left behind.
+
+## Limitations
+
+`lane` is young and intentionally small. Where it's thin today:
+
+- **DB cloning covers Postgres and MySQL.** Other engines use `engine: none` —
+  you still get the worktree, ports, and generated `.env`; lane just doesn't
+  clone the data (fine for Redis, SQLite, or a DB you manage yourself). Adding an
+  engine is one branch in `src/db.ts` and a test.
+- **Local only.** No remote or cloud environments — it drives your local Docker
+  and checkouts.
+- **`health` is declared but not awaited.** `up` starts services and returns; it
+  doesn't yet poll the manifest's `health` URL.
+
+None of these are load-bearing decisions — they're just where the work stopped.
+The project is built to grow; these make good first PRs. See
+[CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## The bundled skill
 

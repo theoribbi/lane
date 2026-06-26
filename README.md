@@ -1,8 +1,8 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./assets/lane-logo-dark.svg">
-  <img src="./assets/lane-logo.svg" alt="lane" width="560">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/theoribbi/lane/main/assets/lane-logo-dark.svg">
+  <img src="https://raw.githubusercontent.com/theoribbi/lane/main/assets/lane-logo.png" alt="lane" width="560">
 </picture>
 
 **Isolated multi-repo worktree dev environments — cloned DBs, derived ports, zero env wiring.**

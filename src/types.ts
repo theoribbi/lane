@@ -43,7 +43,8 @@ export interface RepoRecord {
   composeProject: string; // "<repo>-<env>"
   runtime: Runtime;
   services: ResolvedService[];
-  db?: { engine: "postgres" | "mysql"; container: string; database: string };
+  repoRoot: string;
+  db?: { engine: "postgres" | "mysql"; container: string; database: string; user: string; password?: string };
 }
 
 export interface EnvRecord {

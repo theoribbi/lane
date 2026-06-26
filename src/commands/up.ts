@@ -40,8 +40,9 @@ export async function up(
       composeProject: `${name}-${env}`,
       runtime: m.runtime,
       services,
+      repoRoot: m.repoRoot,
       db: m.db.engine === "none" ? undefined
-        : { engine: m.db.engine, container: m.db.container!, database: m.db.target!.replace("{env}", slug) },
+        : { engine: m.db.engine, container: m.db.container!, database: m.db.target!.replace("{env}", slug), user: m.db.user!, password: m.db.password },
     });
   }
   const record: EnvRecord = { name: env, slug, offset, createdAt: new Date().toISOString(), repos: repoRecords };
@@ -49,7 +50,10 @@ export async function up(
   // Phase 2: materialize each repo (worktree, DB clone, generated config, start).
   for (const repo of record.repos) {
     const m = manifests[repo.name];
-    await addWorktree(deps.runner, m.repoRoot, repo.worktreePath, repo.branch).catch(() => {});
+    await addWorktree(deps.runner, m.repoRoot, repo.worktreePath, repo.branch).catch((err: unknown) => {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (!msg.includes("already exists")) throw err;
+    });
     if (repo.db) await cloneDb(deps.runner, m.db, repo.db.database);
     const vars = buildEnvVars(m, record, repo);
     await mkdir(path.join(repo.worktreePath, ".lane"), { recursive: true });

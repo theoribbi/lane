@@ -49,5 +49,11 @@ describe("up", () => {
     const dotenv = await readFile(path.join(wtBase, "gpa-lane-a", ".env"), "utf8");
     expect(dotenv).toContain("BROKINSOFT_API_URL=http://host.docker.internal:3210");
     expect(dotenv).toContain("DATABASE_URL=postgres://gpa:pw@host.docker.internal:5533/gpa_lane_a");
+    // new fields: repoRoot and db credentials must be persisted into the record
+    const gpa = rec.repos.find((r) => r.name === "gpa")!;
+    expect(gpa.repoRoot).toBe(gpaRoot);
+    expect(gpa.db?.user).toBe("gpa");
+    expect(gpa.db?.password).toBe("pw");
+    expect(bk.repoRoot).toBe(bkRoot);
   });
 });

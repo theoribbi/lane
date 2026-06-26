@@ -28,12 +28,10 @@ export async function down(
       ], { cwd: repo.worktreePath }).catch(() => {});
     }
     if (repo.db) {
-      const db: DbManifest = { engine: repo.db.engine, container: repo.db.container, user: undefined, password: undefined };
-      // user/password are not in the record; psql inside the container uses the
-      // container's superuser via peer/trust by default. Pass through via env in prod.
-      await dropDb(runner, { ...db, user: "postgres" }, repo.db.database).catch(() => {});
+      const db: DbManifest = { engine: repo.db.engine, container: repo.db.container, user: repo.db.user, password: repo.db.password };
+      await dropDb(runner, db, repo.db.database).catch(() => {});
     }
-    await removeWorktree(runner, opts.repoRoots[repo.name] ?? repo.worktreePath, repo.worktreePath, opts.force).catch(() => {});
+    await removeWorktree(runner, opts.repoRoots[repo.name] ?? repo.repoRoot, repo.worktreePath, opts.force).catch(() => {});
   }
 
   await deleteEnv(opts.env);

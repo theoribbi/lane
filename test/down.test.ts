@@ -10,10 +10,10 @@ import type { EnvRecord } from "../src/types.js";
 const rec: EnvRecord = {
   name: "lane-a", slug: "lane_a", offset: 10, createdAt: "t",
   repos: [{
-    name: "gpa", worktreePath: "/x/wt/gpa-lane-a", branch: "lane-a", composeProject: "gpa-lane-a",
+    name: "web", worktreePath: "/x/wt/web-lane-a", branch: "lane-a", composeProject: "web-lane-a",
     runtime: "container", services: [{ name: "web", port: 3012 }],
-    repoRoot: "/x/gpa",
-    db: { engine: "postgres", container: "gpa-postgres", database: "gpa_lane_a", user: "gpa", password: "pw" },
+    repoRoot: "/x/web",
+    db: { engine: "postgres", container: "web-postgres", database: "web_lane_a", user: "web", password: "pw" },
   }],
 };
 
@@ -36,20 +36,20 @@ describe("down", () => {
   });
 
   it("refuses when a worktree is dirty and leaves the record", async () => {
-    const runner = new FakeRunner({ "git -C /x/wt/gpa-lane-a status --porcelain": { stdout: " M a.ts", stderr: "", exitCode: 0 } });
-    const res = await down({ env: "lane-a", force: false, repoRoots: { gpa: "/x/gpa" } }, { runner });
+    const runner = new FakeRunner({ "git -C /x/wt/web-lane-a status --porcelain": { stdout: " M a.ts", stderr: "", exitCode: 0 } });
+    const res = await down({ env: "lane-a", force: false, repoRoots: { web: "/x/web" } }, { runner });
     expect(res.removed).toBe(false);
     expect(await readEnv("lane-a")).not.toBeNull();
   });
 
   it("tears down containers, drops db via record user, removes worktree, deletes record when clean", async () => {
     const runner = new FakeRunner(); // all status empty -> clean
-    const res = await down({ env: "lane-a", force: false, repoRoots: { gpa: "/x/gpa" } }, { runner });
+    const res = await down({ env: "lane-a", force: false, repoRoots: { web: "/x/web" } }, { runner });
     expect(res.removed).toBe(true);
     const cmds = runner.calls.map((c) => [c.cmd, ...c.args].join(" "));
     expect(cmds.some((c) => c.includes("compose") && c.includes("down") && c.includes("-v"))).toBe(true);
-    // drop must use the record's user (gpa), not hardcoded postgres
-    expect(cmds.some((c) => c.includes("DROP DATABASE") && c.includes("gpa_lane_a") && c.includes("gpa"))).toBe(true);
+    // drop must use the record's user (web), not hardcoded postgres
+    expect(cmds.some((c) => c.includes("DROP DATABASE") && c.includes("web_lane_a") && c.includes("web"))).toBe(true);
     expect(cmds.some((c) => c.includes("worktree") && c.includes("remove"))).toBe(true);
     expect(await readEnv("lane-a")).toBeNull();
   });

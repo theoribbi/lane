@@ -5,10 +5,10 @@ import { addWorktree, isClean, removeWorktree } from "../src/worktree.js";
 describe("worktree", () => {
   it("addWorktree runs git worktree add with a new branch", async () => {
     const r = new FakeRunner();
-    await addWorktree(r, "/x/gpa", "/x/wt/gpa-lane-a", "lane-a");
+    await addWorktree(r, "/x/web", "/x/wt/web-lane-a", "lane-a");
     const c = r.calls[0];
     expect(c.cmd).toBe("git");
-    expect(c.args).toEqual(["-C", "/x/gpa", "worktree", "add", "-b", "lane-a", "/x/wt/gpa-lane-a"]);
+    expect(c.args).toEqual(["-C", "/x/web", "worktree", "add", "-b", "lane-a", "/x/wt/web-lane-a"]);
   });
 
   it("isClean is true when status is empty and nothing is unpushed", async () => {

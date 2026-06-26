@@ -19,7 +19,7 @@ export interface DbManifest {
   user?: string;
   password?: string;
   source?: string;    // dev seeded DB to clone
-  target?: string;    // clone naming template, e.g. "gpa_{env}"
+  target?: string;    // clone naming template, e.g. "web_{env}"
 }
 
 export interface Manifest {

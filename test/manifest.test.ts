@@ -2,33 +2,33 @@
 import { describe, it, expect } from "vitest";
 import { parseManifest } from "../src/manifest.js";
 
-const GPA = `
-name: gpa
+const WEB = `
+name: web
 runtime: container
 services:
   web: { basePort: 3002, health: "http://localhost:{port}/api/health" }
   worker: {}
 db:
   engine: postgres
-  container: gpa-postgres
+  container: web-postgres
   hostPort: 5533
-  user: gpa
-  password: gpa_dev_password
-  source: gpa
-  target: "gpa_{env}"
+  user: web
+  password: web_dev_password
+  source: web
+  target: "web_{env}"
 dependsOn:
-  - { repo: brokinsoft-api, inject: BROKINSOFT_API_URL, fallback: "http://host.docker.internal:3200" }
+  - { repo: api, inject: API_URL, fallback: "http://host.docker.internal:3200" }
 `;
 
 describe("parseManifest", () => {
   it("parses a valid manifest and attaches repoRoot", () => {
-    const m = parseManifest(GPA, "/x/gpa");
-    expect(m.name).toBe("gpa");
+    const m = parseManifest(WEB, "/x/web");
+    expect(m.name).toBe("web");
     expect(m.runtime).toBe("container");
     expect(m.services.web.basePort).toBe(3002);
-    expect(m.db.target).toBe("gpa_{env}");
-    expect(m.dependsOn?.[0].inject).toBe("BROKINSOFT_API_URL");
-    expect(m.repoRoot).toBe("/x/gpa");
+    expect(m.db.target).toBe("web_{env}");
+    expect(m.dependsOn?.[0].inject).toBe("API_URL");
+    expect(m.repoRoot).toBe("/x/web");
   });
 
   it("rejects a manifest missing name", () => {
@@ -37,7 +37,7 @@ describe("parseManifest", () => {
   });
 
   it("allows db.engine none with no source", () => {
-    const m = parseManifest("name: bk\nruntime: native\nservices:\n  api: { basePort: 3200 }\ndb: { engine: none }", "/x/bk");
+    const m = parseManifest("name: api\nruntime: native\nservices:\n  api: { basePort: 3200 }\ndb: { engine: none }", "/x/api");
     expect(m.db.engine).toBe("none");
   });
 });

@@ -1,12 +1,12 @@
 <svg width="100%" viewBox="0 0 680 320" role="img" xmlns="http://www.w3.org/2000/svg">
   <title>lane</title>
-  <desc>Logo for the lane open-source project: abstract parallel lanes with wordmark</desc>
+  <desc>Logo for the lane open-source project: abstract parallel lanes with wordmark (dark theme)</desc>
 
   <!-- lane 1 (blue) -->
-  <line x1="44" y1="102" x2="248" y2="102" stroke="#4A7CF7" stroke-width="2" stroke-linecap="round"/>
-  <circle cx="44" cy="102" r="4" fill="#4A7CF7"/>
-  <circle cx="130" cy="102" r="6" fill="#4A7CF7"/>
-  <circle cx="248" cy="102" r="4" fill="#4A7CF7" opacity="0.35"/>
+  <line x1="44" y1="102" x2="248" y2="102" stroke="#5B8BFF" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="44" cy="102" r="4" fill="#5B8BFF"/>
+  <circle cx="130" cy="102" r="6" fill="#5B8BFF"/>
+  <circle cx="248" cy="102" r="4" fill="#5B8BFF" opacity="0.35"/>
 
   <!-- lane 2 (teal) -->
   <line x1="44" y1="150" x2="248" y2="150" stroke="#2EC4B6" stroke-width="2" stroke-linecap="round"/>
@@ -21,9 +21,9 @@
   <circle cx="248" cy="198" r="4" fill="#F7C948" opacity="0.35"/>
 
   <!-- divider -->
-  <line x1="278" y1="72" x2="278" y2="232" stroke="#0B0B0B" stroke-opacity="0.12" stroke-width="1" stroke-dasharray="4 4"/>
+  <line x1="278" y1="72" x2="278" y2="232" stroke="#FFFFFF" stroke-opacity="0.18" stroke-width="1" stroke-dasharray="4 4"/>
 
   <!-- wordmark -->
-  <text x="308" y="196" font-family="'Courier New', monospace" font-size="72" font-weight="700" fill="#0B0B0B">lane</text>
-  <text x="310" y="230" font-family="ui-monospace, monospace" font-size="13" fill="#52514E">isolated multi-repo worktree envs</text>
+  <text x="308" y="196" font-family="'Courier New', monospace" font-size="72" font-weight="700" fill="#EDEDED">lane</text>
+  <text x="310" y="230" font-family="ui-monospace, monospace" font-size="13" fill="#9A9A9A">isolated multi-repo worktree envs</text>
 </svg>

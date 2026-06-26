@@ -32,7 +32,7 @@ missing, generate a draft and review it before proceeding:
 lane init <name> -c docker-compose.yml   # then set basePort, db.*, dependsOn
 ```
 
-The persistent DB server container (e.g. `gpa-postgres`) and the seeded source
+The persistent DB server container (e.g. `app-postgres`) and the seeded source
 DB named in `lane.yml` must already be running — `lane` clones *from* it.
 
 ## Lifecycle
@@ -43,7 +43,7 @@ touches in one command so they share one offset and resolve each other:
 ```sh
 lane up <env> <repo...> --root <repo>=<path>,<repo>=<path>
 # e.g.
-lane up feat-xyz gpa brokinsoft-api --root gpa=../gpa,brokinsoft-api=../brokinsoft-api
+lane up feat-x web api --root web=../web,api=../api
 ```
 
 After `up`, work inside the generated worktrees (paths shown by `lane list`).

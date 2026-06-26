@@ -11,7 +11,7 @@ import type { EnvRecord } from "../src/types.js";
 
 const rec: EnvRecord = {
   name: "lane-a", slug: "lane_a", offset: 10, createdAt: "t",
-  repos: [{ name: "gpa", worktreePath: "/x/wt/gpa-lane-a", branch: "lane-a", composeProject: "gpa-lane-a", runtime: "container", services: [{ name: "web", port: 3012 }] }],
+  repos: [{ name: "web", worktreePath: "/x/wt/web-lane-a", branch: "lane-a", composeProject: "web-lane-a", runtime: "container", services: [{ name: "web", port: 3012 }] }],
 };
 
 describe("list/prune", () => {
@@ -31,10 +31,10 @@ describe("list/prune", () => {
 
   it("prune reports docker compose projects not in the registry as orphans", async () => {
     const runner = new FakeRunner({
-      "docker compose ls": { stdout: "gpa-lane-a\nconnect-ghost\n", stderr: "", exitCode: 0 },
+      "docker compose ls": { stdout: "web-lane-a\nconnect-ghost\n", stderr: "", exitCode: 0 },
     });
     const res = await prune({ runner });
     expect(res.orphans).toContain("connect-ghost");
-    expect(res.orphans).not.toContain("gpa-lane-a");
+    expect(res.orphans).not.toContain("web-lane-a");
   });
 });

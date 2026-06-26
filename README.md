@@ -1,6 +1,9 @@
 <div align="center">
 
-<img src="./assets/lane-logo.png" alt="lane" width="560">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/lane-logo-dark.svg">
+  <img src="./assets/lane-logo.svg" alt="lane" width="560">
+</picture>
 
 **Isolated multi-repo worktree dev environments — cloned DBs, derived ports, zero env wiring.**
 
@@ -30,7 +33,7 @@ Docker dirty.
 `lane` takes a lighter point in the design space:
 
 - **Share the DB *server*, clone the *database*.** Your existing persistent DB
-  container hosts a per-env clone (`gpa_lane_a`) next to the seeded source. No
+  container hosts a per-env clone (`app_feat_x`) next to the seeded source. No
   migration conflicts — each env owns its database.
 - **One env = one compose project, app services only.** `main` and worktrees
   run identically (no native-vs-container drift); only ~2 app containers per
@@ -79,17 +82,17 @@ pnpm install && pnpm build && pnpm link --global
 
 ```sh
 # Generate a manifest draft from an existing compose file
-lane init gpa -c docker-compose.yml      # review basePort, db.*, dependsOn
+lane init web -c docker-compose.yml      # review basePort, db.*, dependsOn
 
-# Spin up env "lane-a" spanning two repos
-lane up lane-a gpa brokinsoft-api \
-  --root gpa=../gpa,brokinsoft-api=../brokinsoft-api
+# Spin up env "feat-x" spanning two repos
+lane up feat-x web api \
+  --root web=../web,api=../api
 
 # See active envs (offsets, ports, DB names, dirty status)
 lane list
 
 # Tear down — refuses if a worktree is dirty or has unpushed commits
-lane down lane-a
+lane down feat-x
 ```
 
 ## Commands
@@ -111,37 +114,37 @@ Place at each repo root and commit it. **Load-bearing**: `lane up` fails fast if
 it's wrong, so it can't drift like a wiki.
 
 ```yaml
-name: gpa                       # short id — DB / container / worktree names
+name: web                       # short id — DB / container / worktree names
 runtime: container              # container | native
 
 services:
   web:
-    basePort: 3002              # actual port = basePort + env.offset (probed if taken)
+    basePort: 3000              # actual port = basePort + env.offset (probed if taken)
     health: "http://localhost:{port}/api/health"
   worker: {}                    # no port
 
 db:
   engine: postgres              # postgres | mysql | none
-  container: gpa-postgres       # shared persistent DB server
-  hostPort: 5533
-  user: gpa
-  password: gpa_dev_password
-  source: gpa                   # seeded dev DB to clone
-  target: "gpa_{env}"           # {env} → sanitized env slug
+  container: app-postgres       # shared persistent DB server
+  hostPort: 5432
+  user: app
+  password: app_dev_password
+  source: app                   # seeded dev DB to clone
+  target: "app_{env}"           # {env} → sanitized env slug
 
 dependsOn:
-  - repo: brokinsoft-api
-    inject: BROKINSOFT_API_URL
-    fallback: "http://host.docker.internal:3200"  # used when dep not in env
+  - repo: api
+    inject: API_URL
+    fallback: "http://host.docker.internal:4000"  # used when dep not in env
 ```
 
-A native service with no local DB (e.g. a Rust API over a remote ERP):
+A native service with no local DB (e.g. a backend that talks to a remote system):
 
 ```yaml
-name: brokinsoft-api
+name: api
 runtime: native
 services:
-  api: { basePort: 3200 }
+  api: { basePort: 4000 }
 db: { engine: none }
 ```
 

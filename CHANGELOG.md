@@ -1,5 +1,17 @@
 # Changelog
 
+# [0.2.0](https://github.com/theoribbi/lane/compare/lane@0.1.1...lane@0.2.0) (2026-06-26)
+
+
+### Bug Fixes
+
+* rename plugin marketplace lane-dev -> lane ([2225e4b](https://github.com/theoribbi/lane/commit/2225e4b6b08a8a94afce33499953b5d9a00d22d6))
+
+
+### Features
+
+* --no-deps on start + configurable compose path ([a92108a](https://github.com/theoribbi/lane/commit/a92108a7a2fa7bd2d0de2deabedddeab3a81be07))
+
 ## [0.1.1](https://github.com/theoribbi/lane/compare/lane@0.1.0...lane@0.1.1) (2026-06-26)
 
 # 0.1.0 (2026-06-26)

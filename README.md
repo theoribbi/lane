@@ -1,6 +1,6 @@
 <div align="center">
 
-# lane
+<img src="./assets/lane-logo.png" alt="lane" width="560">
 
 **Isolated multi-repo worktree dev environments — cloned DBs, derived ports, zero env wiring.**
 
@@ -42,17 +42,31 @@ Docker dirty.
 
 ## Install
 
+**As a Claude Code plugin** (recommended — bundles the `lane` workflow skill so
+agents reach for it automatically):
+
+```text
+/plugin marketplace add theoribbi/lane
+/plugin install lane@lane-dev
+```
+
+**As a CLI** (npm):
+
 ```sh
 npm install -g @theoribbi/lane
 # or: pnpm add -g @theoribbi/lane
 ```
 
-From source:
+**From source:**
 
 ```sh
 git clone https://github.com/theoribbi/lane.git && cd lane
 pnpm install && pnpm build && pnpm link --global
 ```
+
+> The plugin and the CLI are complementary: the plugin gives agents the *skill*
+> (when/how to use lane), the npm package provides the `lane` *binary* the skill
+> drives. Install both for the full experience.
 
 ## Quick start
 
@@ -162,19 +176,13 @@ then materializes each repo: create the worktree, clone the DB via
 reverses it precisely from that record, after a cleanliness gate that refuses to
 destroy uncommitted or unpushed work.
 
-## Claude Code plugin
+## The bundled skill
 
-This repo is also a [Claude Code](https://claude.ai/code) plugin: it bundles a
-skill ([`skills/lane/SKILL.md`](./skills/lane/SKILL.md)) so agents know to reach
-for `lane` when they start isolated or parallel multi-repo work. Install it like
-any plugin:
-
-```text
-/plugin marketplace add theoribbi/lane
-/plugin install lane@lane-dev
-```
-
-Prefer just the skill, no plugin? Copy it in:
+The plugin ships a skill ([`skills/lane/SKILL.md`](./skills/lane/SKILL.md)) that
+teaches agents *when* and *how* to reach for `lane` — start isolated/parallel
+multi-repo work, run the up/down lifecycle, respect the cleanliness gate. It's
+installed automatically by the plugin (see [Install](#install)). Want the skill
+without the plugin? Copy it in:
 
 ```sh
 mkdir -p ~/.claude/skills/lane && cp skills/lane/SKILL.md ~/.claude/skills/lane/

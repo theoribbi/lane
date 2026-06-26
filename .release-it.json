@@ -1,7 +1,8 @@
 {
   "git": {
-    "commitMessage": "chore: release v${version}",
-    "tagName": "v${version}",
+    "commitMessage": "chore: release lane@${version}",
+    "tagName": "lane@${version}",
+    "tagAnnotation": "lane@${version}",
     "requireCleanWorkingDir": true,
     "requireBranch": "main"
   },
@@ -10,7 +11,7 @@
   },
   "github": {
     "release": true,
-    "releaseName": "v${version}"
+    "releaseName": "lane@${version}"
   },
   "hooks": {
     "before:init": ["pnpm test", "pnpm typecheck"],

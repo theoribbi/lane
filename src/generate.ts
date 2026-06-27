@@ -26,6 +26,7 @@ export function renderComposeOverride(
   for (const svc of repo.services) {
     const base = manifest.services[svc.name]?.basePort;
     const entry: Record<string, unknown> = {
+      container_name: `${repo.composeProject}-${svc.name}`,
       environment: vars,
       extra_hosts: ["host.docker.internal:host-gateway"],
     };

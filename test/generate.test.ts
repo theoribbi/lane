@@ -39,4 +39,11 @@ describe("generate", () => {
     expect(yaml.services.web.extra_hosts).toEqual(["host.docker.internal:host-gateway"]);
     expect(yaml.services.worker.ports).toBeUndefined();
   });
+
+  it("assigns a per-env container_name to each service", () => {
+    const vars = buildEnvVars(web, env, repo);
+    const yaml = parseYaml(renderComposeOverride(web, repo, vars));
+    expect(yaml.services.web.container_name).toBe("web-lane-a-web");
+    expect(yaml.services.worker.container_name).toBe("web-lane-a-worker");
+  });
 });

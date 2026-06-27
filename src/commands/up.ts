@@ -1,4 +1,5 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, writeFile, copyFile, readFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import type { Runner } from "../runner.js";
 import type { PortChecker } from "../ports.js";
@@ -9,13 +10,24 @@ import { nextOffset, bindPort } from "../ports.js";
 import { cloneDb } from "../db.js";
 import { addWorktree } from "../worktree.js";
 import { buildEnvVars, renderDotenv, renderComposeOverride } from "../generate.js";
+import { preflight, type PreflightFinding } from "../preflight.js";
 
 export interface UpDeps { runner: Runner; isFree: PortChecker; worktreeBase: string; }
 
+export function bootArgs(manifest: Manifest, repo: RepoRecord): string[] {
+  const compose = manifest.compose ?? "docker-compose.yml";
+  return ["compose", "-f", compose, "-f", ".lane/compose.override.yml",
+    "-p", repo.composeProject, "up", "-d", "--no-deps", ...repo.services.map((s) => s.name)];
+}
+
+export function bootCommandString(manifest: Manifest, repo: RepoRecord): string {
+  return `cd ${repo.worktreePath} && docker ${bootArgs(manifest, repo).join(" ")}`;
+}
+
 export async function up(
-  opts: { env: string; repos: string[]; repoRoots: Record<string, string> },
+  opts: { env: string; repos: string[]; repoRoots: Record<string, string>; start?: boolean },
   deps: UpDeps,
-): Promise<EnvRecord> {
+): Promise<{ record: EnvRecord; findings: PreflightFinding[] }> {
   const { env, repos, repoRoots } = opts;
   const slug = slugify(env);
 
@@ -47,31 +59,46 @@ export async function up(
   }
   const record: EnvRecord = { name: env, slug, offset, createdAt: new Date().toISOString(), repos: repoRecords };
 
-  // Phase 2: materialize each repo (worktree, DB clone, generated config, start).
+  // Phase 2: materialize (worktree, copyFiles, DB clone, generated config).
   for (const repo of record.repos) {
     const m = manifests[repo.name];
     await addWorktree(deps.runner, m.repoRoot, repo.worktreePath, repo.branch).catch((err: unknown) => {
       const msg = err instanceof Error ? err.message : String(err);
       if (!msg.includes("already exists")) throw err;
     });
+    for (const f of m.copyFiles ?? []) {
+      await mkdir(path.dirname(path.join(repo.worktreePath, f)), { recursive: true });
+      await copyFile(path.join(m.repoRoot, f), path.join(repo.worktreePath, f)).catch(() => {
+        // source missing → preflight's missing-env-file surfaces the consequence
+      });
+    }
     if (repo.db) await cloneDb(deps.runner, m.db, repo.db.database);
     const vars = buildEnvVars(m, record, repo);
     await mkdir(path.join(repo.worktreePath, ".lane"), { recursive: true });
     await writeFile(path.join(repo.worktreePath, ".env"), renderDotenv(vars), "utf8");
     await writeFile(path.join(repo.worktreePath, ".lane", "compose.override.yml"), renderComposeOverride(m, repo, vars), "utf8");
-    if (m.runtime === "container") {
-      const svcNames = repo.services.map((s) => s.name);
-      const composeFile = m.compose ?? "docker-compose.yml";
-      // --no-deps: start exactly the manifest's services. Without it, a service
-      // that `depends_on` a bundled DB would pull that DB up under the env
-      // project — but lane uses the shared persistent DB, not a per-env one.
-      await deps.runner.run("docker", [
-        "compose", "-f", composeFile, "-f", ".lane/compose.override.yml",
-        "-p", repo.composeProject, "up", "-d", "--no-deps", ...svcNames,
-      ], { cwd: repo.worktreePath });
-    }
   }
 
   await writeEnv(record);
-  return record;
+
+  // Advisory preflight per container repo (never throws).
+  const findings: PreflightFinding[] = [];
+  for (const repo of record.repos) {
+    const m = manifests[repo.name];
+    if (m.runtime !== "container") continue;
+    const composeYaml = await readFile(path.join(repo.worktreePath, m.compose ?? "docker-compose.yml"), "utf8").catch(() => "");
+    findings.push(...preflight({ manifest: m, composeYaml, fileExists: (f) => existsSync(path.join(repo.worktreePath, f)) }));
+  }
+
+  // Optional boot (fail loud).
+  if (opts.start) {
+    for (const repo of record.repos) {
+      const m = manifests[repo.name];
+      if (m.runtime !== "container") continue;
+      const res = await deps.runner.run("docker", bootArgs(m, repo), { cwd: repo.worktreePath });
+      if (res.exitCode !== 0) throw new Error(`lane: docker compose up failed for ${repo.name}: ${res.stderr.trim() || `exit ${res.exitCode}`}`);
+    }
+  }
+
+  return { record, findings };
 }

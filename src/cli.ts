@@ -23,7 +23,7 @@ program.command("up <env> <repos...>")
       opts.root.split(",").filter(Boolean).map((p) => p.split("=") as [string, string]),
     );
     for (const r of repos) repoRoots[r] ??= path.resolve(r);
-    const rec = await up({ env, repos, repoRoots }, { runner, isFree: isPortFreeReal, worktreeBase });
+    const { record: rec } = await up({ env, repos, repoRoots }, { runner, isFree: isPortFreeReal, worktreeBase });
     console.log(`Env ${rec.name} up (offset ${rec.offset}).`);
   });
 

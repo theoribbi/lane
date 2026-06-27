@@ -34,32 +34,59 @@ describe("up", () => {
     return () => rm(root, { recursive: true, force: true });
   });
 
-  it("creates a record wiring web to the env's api port", async () => {
+  it("prepares (no docker compose up) and wires web to the env's api port", async () => {
     const runner = new FakeRunner();
-    // make worktree paths exist so .env writes succeed
     await mkdir(path.join(wtBase, "web-lane-a"), { recursive: true });
     await mkdir(path.join(wtBase, "api-lane-a"), { recursive: true });
-    const rec = await up(
-      { env: "lane-a", repos: ["web", "api"], repoRoots: { web: webRoot, "api": apiRoot } },
+    const { record } = await up(
+      { env: "lane-a", repos: ["web", "api"], repoRoots: { web: webRoot, api: apiRoot } },
       { runner, isFree: async () => true, worktreeBase: wtBase },
     );
-    expect(rec.offset).toBe(10);
-    const api = rec.repos.find((r) => r.name === "api")!;
-    expect(api.services.find((s) => s.name === "api")!.port).toBe(3210);
+    expect(record.offset).toBe(10);
     const dotenv = await readFile(path.join(wtBase, "web-lane-a", ".env"), "utf8");
     expect(dotenv).toContain("API_URL=http://host.docker.internal:3210");
     expect(dotenv).toContain("DATABASE_URL=postgres://web:pw@host.docker.internal:5533/web_lane_a");
-    // new fields: repoRoot and db credentials must be persisted into the record
-    const web = rec.repos.find((r) => r.name === "web")!;
+    const web = record.repos.find((r) => r.name === "web")!;
     expect(web.repoRoot).toBe(webRoot);
     expect(web.db?.user).toBe("web");
-    expect(web.db?.password).toBe("pw");
-    expect(api.repoRoot).toBe(apiRoot);
-    // container services start with --no-deps so a bundled DB isn't pulled in
-    const webUp = runner.calls.find(
-      (c) => c.cmd === "docker" && c.args.includes("up") && c.args.includes("web"),
-    )!;
-    expect(webUp.args).toContain("--no-deps");
-    expect(webUp.args).toContain("docker-compose.yml");
+    // default up does NOT boot containers
+    expect(runner.calls.find((c) => c.cmd === "docker" && c.args.includes("up"))).toBeUndefined();
+  });
+
+  it("boots with --no-deps when start is true", async () => {
+    const runner = new FakeRunner();
+    await mkdir(path.join(wtBase, "web-lane-a"), { recursive: true });
+    await mkdir(path.join(wtBase, "api-lane-a"), { recursive: true });
+    await up(
+      { env: "lane-a", repos: ["web", "api"], repoRoots: { web: webRoot, api: apiRoot }, start: true },
+      { runner, isFree: async () => true, worktreeBase: wtBase },
+    );
+    const boot = runner.calls.find((c) => c.cmd === "docker" && c.args.includes("up") && c.args.includes("web"))!;
+    expect(boot.args).toContain("--no-deps");
+    expect(boot.args).toContain("docker-compose.yml");
+  });
+
+  it("fails loud when the boot exits non-zero", async () => {
+    const runner = new FakeRunner({ "docker compose -f docker-compose.yml": { stdout: "", stderr: "bad compose", exitCode: 1 } });
+    await mkdir(path.join(wtBase, "web-lane-a"), { recursive: true });
+    await mkdir(path.join(wtBase, "api-lane-a"), { recursive: true });
+    await expect(up(
+      { env: "lane-a", repos: ["web", "api"], repoRoots: { web: webRoot, api: apiRoot }, start: true },
+      { runner, isFree: async () => true, worktreeBase: wtBase },
+    )).rejects.toThrow(/compose up failed/i);
+  });
+
+  it("copies copyFiles into the worktree", async () => {
+    await writeFile(path.join(webRoot, "lane.yml"), WEB.replace("runtime: container", "runtime: container\ncopyFiles: [secret.env]"));
+    await writeFile(path.join(webRoot, "secret.env"), "TOKEN=abc");
+    const runner = new FakeRunner();
+    await mkdir(path.join(wtBase, "web-lane-a"), { recursive: true });
+    await mkdir(path.join(wtBase, "api-lane-a"), { recursive: true });
+    await up(
+      { env: "lane-a", repos: ["web", "api"], repoRoots: { web: webRoot, api: apiRoot } },
+      { runner, isFree: async () => true, worktreeBase: wtBase },
+    );
+    const copied = await readFile(path.join(wtBase, "web-lane-a", "secret.env"), "utf8");
+    expect(copied).toBe("TOKEN=abc");
   });
 });

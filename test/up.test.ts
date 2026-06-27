@@ -89,4 +89,17 @@ describe("up", () => {
     const copied = await readFile(path.join(wtBase, "web-lane-a", "secret.env"), "utf8");
     expect(copied).toBe("TOKEN=abc");
   });
+
+  it("emits a copy-missing warning when a copyFiles source does not exist", async () => {
+    await writeFile(path.join(webRoot, "lane.yml"), WEB.replace("runtime: container", "runtime: container\ncopyFiles: [missing.env]"));
+    // Do NOT create missing.env in webRoot
+    const runner = new FakeRunner();
+    await mkdir(path.join(wtBase, "web-lane-a"), { recursive: true });
+    await mkdir(path.join(wtBase, "api-lane-a"), { recursive: true });
+    const { findings } = await up(
+      { env: "lane-a", repos: ["web", "api"], repoRoots: { web: webRoot, api: apiRoot } },
+      { runner, isFree: async () => true, worktreeBase: wtBase },
+    );
+    expect(findings.find((f) => f.code === "copy-missing" && f.message.includes("missing.env"))).toBeTruthy();
+  });
 });

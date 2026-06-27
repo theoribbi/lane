@@ -3,7 +3,7 @@ import type { Manifest } from "./types.js";
 
 export interface PreflightFinding {
   level: "info" | "warn";
-  code: "missing-env-file" | "fixed-container-name" | "bundled-db" | "port-collision";
+  code: "missing-env-file" | "fixed-container-name" | "bundled-db" | "port-collision" | "copy-missing";
   message: string;
 }
 

@@ -21,7 +21,7 @@ export function bootArgs(manifest: Manifest, repo: RepoRecord): string[] {
 }
 
 export function bootCommandString(manifest: Manifest, repo: RepoRecord): string {
-  return `cd ${repo.worktreePath} && docker ${bootArgs(manifest, repo).join(" ")}`;
+  return `cd "${repo.worktreePath}" && docker ${bootArgs(manifest, repo).join(" ")}`;
 }
 
 export async function up(
@@ -60,6 +60,7 @@ export async function up(
   const record: EnvRecord = { name: env, slug, offset, createdAt: new Date().toISOString(), repos: repoRecords };
 
   // Phase 2: materialize (worktree, copyFiles, DB clone, generated config).
+  const findings: PreflightFinding[] = [];
   for (const repo of record.repos) {
     const m = manifests[repo.name];
     await addWorktree(deps.runner, m.repoRoot, repo.worktreePath, repo.branch).catch((err: unknown) => {
@@ -69,7 +70,8 @@ export async function up(
     for (const f of m.copyFiles ?? []) {
       await mkdir(path.dirname(path.join(repo.worktreePath, f)), { recursive: true });
       await copyFile(path.join(m.repoRoot, f), path.join(repo.worktreePath, f)).catch(() => {
-        // source missing → preflight's missing-env-file surfaces the consequence
+        findings.push({ level: "warn", code: "copy-missing",
+          message: `copyFiles source "${f}" not found in ${repo.name} — skipped` });
       });
     }
     if (repo.db) await cloneDb(deps.runner, m.db, repo.db.database);
@@ -82,7 +84,6 @@ export async function up(
   await writeEnv(record);
 
   // Advisory preflight per container repo (never throws).
-  const findings: PreflightFinding[] = [];
   for (const repo of record.repos) {
     const m = manifests[repo.name];
     if (m.runtime !== "container") continue;

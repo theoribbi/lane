@@ -34,7 +34,7 @@ program.command("up <env> <repos...>")
     const { record, findings } = await up({ env, repos, repoRoots, start: opts.start }, { runner, isFree: isPortFreeReal, worktreeBase });
     console.log(`Env ${record.name} ${opts.start ? "up" : "prepared"} (offset ${record.offset}).`);
     renderFindings(findings);
-    if (!opts.start) {
+    if (!opts.start && record.repos.some((r) => r.runtime === "container")) {
       console.log("\nBoot it with:");
       for (const repo of record.repos) {
         if (repo.runtime !== "container") continue;

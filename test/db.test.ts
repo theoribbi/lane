@@ -24,3 +24,15 @@ describe("db postgres", () => {
     expect(joined).toContain("web_lane_a");
   });
 });
+
+it("clone rejects when a docker command exits non-zero", async () => {
+  const db = { engine: "postgres", container: "pg", user: "u", password: "p", source: "src" } as const;
+  const r = new FakeRunner({ "docker exec -e PGPASSWORD pg createdb": { stdout: "", stderr: "boom", exitCode: 1 } });
+  await expect(cloneDb(r, db, "tgt")).rejects.toThrow(/failed/i);
+});
+
+it("drop rejects when a docker command exits non-zero", async () => {
+  const db = { engine: "postgres", container: "pg", user: "u", password: "p", source: "src" } as const;
+  const r = new FakeRunner({ "docker exec -e PGPASSWORD pg psql": { stdout: "", stderr: "nope", exitCode: 1 } });
+  await expect(dropDb(r, db, "tgt")).rejects.toThrow(/failed/i);
+});

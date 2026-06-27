@@ -40,4 +40,43 @@ describe("preflight", () => {
     expect(f.find((x) => x.code === "bundled-db")?.message).toMatch(/postgres/);
     expect(f.find((x) => x.code === "port-collision")?.message).toMatch(/5533/);
   });
+
+  it("does NOT flag port-collision for bare short-form ports (no host binding)", () => {
+    const noHostBindingCompose = `
+services:
+  web:
+    image: node:20
+  db:
+    image: postgres:16
+    ports:
+      - "5432"
+`;
+    const manifestWebOnly: Manifest = {
+      name: "web", runtime: "container", repoRoot: "/x",
+      services: { web: { basePort: 3000 } },
+      db: { engine: "none", container: "" },
+    };
+    const findings = preflight({ manifest: manifestWebOnly, composeYaml: noHostBindingCompose, fileExists: () => true });
+    expect(findings.filter((x) => x.code === "port-collision")).toHaveLength(0);
+  });
+
+  it("still flags port-collision for host:container form", () => {
+    const hostBindingCompose = `
+services:
+  web:
+    image: node:20
+  db:
+    image: postgres:16
+    ports:
+      - "5533:5432"
+`;
+    const manifestWebOnly: Manifest = {
+      name: "web", runtime: "container", repoRoot: "/x",
+      services: { web: { basePort: 3000 } },
+      db: { engine: "none", container: "" },
+    };
+    const findings = preflight({ manifest: manifestWebOnly, composeYaml: hostBindingCompose, fileExists: () => true });
+    const collision = findings.find((x) => x.code === "port-collision");
+    expect(collision?.message).toMatch(/5533/);
+  });
 });

@@ -48,7 +48,8 @@ export function preflight(input: {
 
     if (!isStarted && Array.isArray(svc?.ports)) {
       for (const p of svc.ports) {
-        const host = typeof p === "string" ? p.split(":")[0] : String(p);
+        if (typeof p !== "string" || !p.includes(":")) continue;
+        const host = p.split(":")[0];
         if (host) out.push({ level: "warn", code: "port-collision",
           message: `service "${name}" publishes host port ${host} which lane does not remap — may collide if started` });
       }

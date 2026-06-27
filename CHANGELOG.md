@@ -1,5 +1,23 @@
 # Changelog
 
+# [0.3.0](https://github.com/theoribbi/lane/compare/lane@0.2.0...lane@0.3.0) (2026-06-27)
+
+
+### Bug Fixes
+
+* copyFiles missing-source warning, doctor source check, cli cleanups ([55eca9c](https://github.com/theoribbi/lane/commit/55eca9c6ed46b2414c8832f3ef4a4a0bafc15f6d))
+* preflight only flags ports that bind a host port ([1131b3e](https://github.com/theoribbi/lane/commit/1131b3e1f9d55c4e11aa305d7fb0516550cc668f))
+
+
+### Features
+
+* advisory preflight diagnostics for compose files ([2ec7b26](https://github.com/theoribbi/lane/commit/2ec7b26a97ca88d864073ad5eed4041765ebeef4))
+* copyFiles manifest field for gitignored config into the worktree ([627eef8](https://github.com/theoribbi/lane/commit/627eef8768da042e43cfe4ca8200f0ce7775aedb))
+* fail loud on non-zero docker exit in db clone/drop ([65b7e7d](https://github.com/theoribbi/lane/commit/65b7e7de250e7f75b699497c3e72857e54d9432b))
+* per-env container_name in compose override to avoid collisions ([45bfa97](https://github.com/theoribbi/lane/commit/45bfa97bfa043fe1f94f9fd8ed89edc8e08d092c))
+* up --start, findings + boot-command output, lane doctor command ([540f3ea](https://github.com/theoribbi/lane/commit/540f3ea66a39c0effa69892c370995d600af9b21))
+* up prepares by default (--start to boot), copyFiles, advisory preflight, fail-loud boot ([4c23daf](https://github.com/theoribbi/lane/commit/4c23daf9525bafdfe6a4dde4dab9c68628bdb4ce))
+
 # [0.2.0](https://github.com/theoribbi/lane/compare/lane@0.1.1...lane@0.2.0) (2026-06-26)
 
 

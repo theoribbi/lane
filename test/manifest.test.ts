@@ -40,4 +40,9 @@ describe("parseManifest", () => {
     const m = parseManifest("name: api\nruntime: native\nservices:\n  api: { basePort: 3200 }\ndb: { engine: none }", "/x/api");
     expect(m.db.engine).toBe("none");
   });
+
+  it("parses copyFiles when present", () => {
+    const m = parseManifest("name: a\nruntime: container\ncopyFiles: [.env.local]\nservices: { web: { basePort: 3000 } }\ndb: { engine: none }", "/x/a");
+    expect(m.copyFiles).toEqual([".env.local"]);
+  });
 });

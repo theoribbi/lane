@@ -26,6 +26,7 @@ export interface Manifest {
   name: string;
   runtime: Runtime;
   compose?: string; // compose file path relative to repo root (default docker-compose.yml)
+  copyFiles?: string[]; // paths relative to repo root, copied into the worktree
   services: Record<string, ServiceManifest>;
   db: DbManifest;
   dependsOn?: DependsOn[];
